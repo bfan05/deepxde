@@ -76,6 +76,9 @@ class Model(BaseModel):
             # weighted
             if self.loss_weights is not None:
                 losses *= self.loss_weights
+                if self.loss_weight_decay is not None:
+                    self.loss_weights = [self.loss_weights[i] * self.loss_weight_decay[i] for i in range(len(self.loss_weights))]
+                    print(self.loss_weights)
             return outputs_, losses
 
         def outputs_losses_train_zcs(inputs, targets, auxiliary_vars):
@@ -173,6 +176,9 @@ class Model(BaseModel):
             # weighted
             if self.loss_weights is not None:
                 losses *= torch.as_tensor(self.loss_weights)
+                if self.loss_weight_decay is not None:
+                    self.loss_weights = [self.loss_weights[i] * self.loss_weight_decay[i] for i in range(len(self.loss_weights))]
+                    print(self.loss_weights)
 
             # clear cached gradients (actually not used with ZCS)
             grad.clear()
@@ -264,6 +270,9 @@ class Model(BaseModel):
             # weighted
             if self.loss_weights is not None:
                 losses *= paddle.to_tensor(self.loss_weights)  # noqa
+                if self.loss_weight_decay is not None:
+                    self.loss_weights = [self.loss_weights[i] * self.loss_weight_decay[i] for i in range(len(self.loss_weights))]
+                    print(self.loss_weights)
 
             # clear cached gradients (actually not used with ZCS)
             grad.clear()

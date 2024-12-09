@@ -41,7 +41,7 @@ data = dde.data.PDE(
 net = dde.nn.PFNN([1, [20, 20], [20, 20], [20, 20], 2], "tanh", "Glorot uniform")
 
 model = dde.Model(data, net)
-model.compile("adam", lr=0.0001, loss_weights=[1, 100, 1000])
+model.compile("adam", lr=0.0001, loss_weights=[1, 100, 1000], loss_weight_decay=[1, 2, 2])
 losshistory, train_state = model.train(iterations=20000)
 dde.saveplot(losshistory, train_state, issave=True, isplot=True)
 

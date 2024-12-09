@@ -32,6 +32,7 @@ class Model:
         self.opt_name = None
         self.batch_size = None
         self.loss_weights = None
+        self.loss_weight_decay = None
         self.callbacks = None
         self.metrics = None
         self.external_trainable_variables = []
@@ -64,6 +65,7 @@ class Model:
         metrics=None,
         decay=None,
         loss_weights=None,
+        loss_weight_decay=None,
         external_trainable_variables=None,
         verbose=1,
     ):
@@ -123,6 +125,7 @@ class Model:
         self.opt_name = optimizer
         loss_fn = losses_module.get(loss)
         self.loss_weights = loss_weights
+        self.loss_weight_decay = loss_weight_decay
         if external_trainable_variables is None:
             self.external_trainable_variables = []
         else:
@@ -186,6 +189,9 @@ class Model:
             # Weighted losses
             if self.loss_weights is not None:
                 losses *= self.loss_weights
+                if self.loss_weight_decay is not None:
+                    self.loss_weights = [self.loss_weights[i] * self.loss_weight_decay[i] for i in range(len(self.loss_weights))]
+                    print(self.loss_weights)
             return losses
 
         losses_train = losses(self.data.losses_train)
@@ -225,6 +231,9 @@ class Model:
             # Weighted losses
             if self.loss_weights is not None:
                 losses *= self.loss_weights
+                if self.loss_weight_decay is not None:
+                    self.loss_weights = [self.loss_weights[i] * self.loss_weight_decay[i] for i in range(len(self.loss_weights))]
+                    print(self.loss_weights)
             return outputs_, losses
 
         @tf.function(jit_compile=config.xla_jit)
@@ -317,6 +326,9 @@ class Model:
             # Weighted losses
             if self.loss_weights is not None:
                 losses *= torch.as_tensor(self.loss_weights)
+                if self.loss_weight_decay is not None:
+                    self.loss_weights = [self.loss_weights[i] * self.loss_weight_decay[i] for i in range(len(self.loss_weights))]
+                    print(self.loss_weights)
             # Clear cached Jacobians and Hessians.
             grad.clear()
             return outputs_, losses
@@ -431,6 +443,9 @@ class Model:
             losses = jax.numpy.asarray(losses)
             if self.loss_weights is not None:
                 losses *= jax.numpy.asarray(self.loss_weights)
+                if self.loss_weight_decay is not None:
+                    self.loss_weights = [self.loss_weights[i] * self.loss_weight_decay[i] for i in range(len(self.loss_weights))]
+                    print(self.loss_weights)
             return outputs_, losses
 
         @jax.jit
@@ -500,6 +515,9 @@ class Model:
             # Weighted losses
             if self.loss_weights is not None:
                 losses *= paddle.to_tensor(self.loss_weights, dtype=losses.dtype)
+                if self.loss_weight_decay is not None:
+                    self.loss_weights = [self.loss_weights[i] * self.loss_weight_decay[i] for i in range(len(self.loss_weights))]
+                    print(self.loss_weights)
             # Clear cached Jacobians and Hessians.
             grad.clear()
             return outputs_, losses
